@@ -5,4 +5,4 @@
 # Don't ignore .gitignore and *.foo files
 !.gitignore
 !docker-compose.yml
-!README
+!README.md
