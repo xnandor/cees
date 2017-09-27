@@ -56,14 +56,44 @@ function settingsFromEnvironment() {
 
 function changeSettings() {
     settingsFromEnvironment;
-    # ROOT
-    SUB_OLD="SERVER_EMAIL = ''"
-    SUB_NEW="DEBUG = True\nSERVER_EMAIL = ''"
+    # DEBUG
+    SUB_OLD="DEBUG = False"
+    SUB_NEW="DEBUG = True"
     sed -i "s|$SUB_OLD|$SUB_NEW|g" /app/settings.py
+    echo "Changed From: $SUB_OLD  |||||| To: $SUB_NEW"
+    # uWSGI IP
+    SUB_OLD="0.0.0.0"
+    SUB_NEW="askbot"
+    sed -i "s|$SUB_OLD|$SUB_NEW|g" /app/deploy/uwsgi.ini
+    echo "Changed From: $SUB_OLD  |||||| To: $SUB_NEW"
+    # uWSGI STATIC MAP
+    SUB_OLD="0.0.0.0"
+    SUB_NEW="askbot"
+    sed -i "s|$SUB_OLD|$SUB_NEW|g" /app/deploy/uwsgi.ini
+    echo "Changed From: $SUB_OLD  |||||| To: $SUB_NEW"
+    # uWSGI PROTO PORT
+    SUB_OLD="bin/uwsgi "
+    SUB_NEW="bin/uwsgi --socket :8888 "
+    sed -i "s|$SUB_OLD|$SUB_NEW|g" /app/deploy/run.sh 
+    echo "Changed From: $SUB_OLD  |||||| To: $SUB_NEW"
+    # uWSGI MEDIA MAP
+    SUB_OLD="/m="
+    SUB_NEW="/askbot/m="
+    sed -i "s|$SUB_OLD|$SUB_NEW|g" /app/deploy/uwsgi.ini
     echo "Changed From: $SUB_OLD  |||||| To: $SUB_NEW"
     # ROOT
     SUB_OLD="ASKBOT_URL = ''"
     SUB_NEW="ASKBOT_URL = '$ROOT'"
+    sed -i "s|$SUB_OLD|$SUB_NEW|g" /app/settings.py
+    echo "Changed From: $SUB_OLD  |||||| To: $SUB_NEW"
+    # STATIC
+    SUB_OLD="STATIC_URL = '/m/'"
+    SUB_NEW="STATIC_URL = '/askbot/m/'"
+    sed -i "s|$SUB_OLD|$SUB_NEW|g" /app/settings.py
+    echo "Changed From: $SUB_OLD  |||||| To: $SUB_NEW"
+    # MEDIA
+    SUB_OLD="MEDIA_URL = '/upfiles/'"
+    SUB_NEW="MEDIA_URL = '/askbot/upfiles/'"
     sed -i "s|$SUB_OLD|$SUB_NEW|g" /app/settings.py
     echo "Changed From: $SUB_OLD  |||||| To: $SUB_NEW"
     # NAME
