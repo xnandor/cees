@@ -58,7 +58,7 @@ function changeSettings() {
     settingsFromEnvironment;
     # DEBUG
     SUB_OLD="DEBUG = False"
-    SUB_NEW="DEBUG = True"
+    SUB_NEW="DEBUG = False"
     sed -i "s|$SUB_OLD|$SUB_NEW|g" /app/settings.py
     echo "Changed From: $SUB_OLD  |||||| To: $SUB_NEW"
     # uWSGI IP

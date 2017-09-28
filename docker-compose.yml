@@ -15,26 +15,18 @@ services:
       cees:
     ports:
       - "50000:50000"
-      # - "8080:8080"
     volumes:
       - "./volumes/host/:/host/"
       - "./volumes/jenkins:/var/jenkins_home"
     environment:
       - JENKINS_OPTS="--prefix=/jenkins"
-      # - JENKINS_OPTS="--webroot=/var/cache/jenkins/war --prefix=/jenkins"
-    # command:
-    #   # /bin/bash -c "cp /host/jenkins /etc/default/jenkins && chmod 777 /etc/default/jenkins && /bin/tini -- /usr/local/bin/jenkins.sh"
-    #   /bin/bash -c "/bin/tini -- /usr/local/bin/jenkins.sh"
   gogs-mysql-db:
     image: mysql:5.7
     container_name: gogs-mysql-db
     volumes:
       - "./volumes/gogs-db-mysql/:/var/lib/mysql/"
-      - "./volumes/gogs-db-conf.d/:/etc/mysql/conf.d/"
     networks:
       cees:
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_DATABASE: "gogs"
       MYSQL_USER: "gogs"
@@ -47,13 +39,12 @@ services:
     networks:
       cees:
     ports:
-      - "10022:22"
-      # - "8081:3000"
+      - "22:22"
     volumes:
       - "./volumes/gogs/:/data/"
       - "./volumes/host/:/host/"
     command:
-      /bin/bash -c "cp /host/gogs.app.ini /data/gogs/conf/app.ini && /bin/s6-svscan /app/gogs/docker/s6/"
+      /bin/bash -c "sed -i 's|/app/gogs/gogs web|/app/gogs/gogs web --config /host/gogs.app.ini|g' /app/gogs/docker/s6/gogs/run && /bin/s6-svscan /app/gogs/docker/s6/"
   xwiki:
     image: "xwiki:mysql-tomcat"
     container_name: xwiki
@@ -61,8 +52,6 @@ services:
       cees:
     depends_on:
       - xwiki-mysql-db
-    # ports:
-    #   - "8082:8080"
     environment:
       - DB_USER=xwiki
       - DB_PASSWORD=xwiki
@@ -79,7 +68,6 @@ services:
       cees:
     volumes:
       - "./volumes/xwiki-db-mysql/:/var/lib/mysql/"
-      - "./volumes/xwiki-db-conf.d/:/etc/mysql/conf.d/"
     environment:
       - MYSQL_ROOT_PASSWORD=xwiki
       - MYSQL_USER=xwiki
@@ -91,8 +79,6 @@ services:
     networks:
       cees:
         ipv4_address: 10.5.0.104
-    ports:
-      - "8084:80"
     volumes:
       - "./volumes/host/:/host/"
     environment:
@@ -105,14 +91,13 @@ services:
     entrypoint:
       "/host/askbot.sh"
   askbot-postgres-db:
-    image: postgres
+    image: postgres:10
     container_name: askbot-postgres-db
     networks:
       cees:
-    # ports:
-    #   - "5432:5432"
     volumes:
       - "./volumes/host/:/host/"
+      - "./volumes/askbot-db-postgres/:/var/lib/postgresql/data/"
     environment:
       POSTGRES_DB: askbot
       POSTGRES_PASSWORD: password
@@ -125,8 +110,6 @@ services:
       - "80:80"
     volumes:
       - "./volumes/host/:/host/"
-      # - "./volumes/nginx/html/:/usr/share/nginx/html:ro"
+      - "./volumes/static/:/static/"
     command:
       /bin/bash -c "/host/wait-for-it.sh askbot:80; /host/wait-for-it.sh gogs:3000; /host/wait-for-it.sh jenkins:8080; /host/wait-for-it.sh xwiki:8080; cp /host/nginx.conf /etc/nginx/; nginx -g 'daemon off;'"
-      # /bin/bash -c "/host/wait-for-it.sh askbot:80; cp /host/nginx.conf /etc/nginx/; nginx -g 'daemon off;'"
-      # /bin/bash -c "nginx -g 'daemon off;'"
